@@ -1,4 +1,5 @@
 const User = require ("./model");
+const jwt = require ("jsonwebtoken");
 
 exports.createUser = async (req,res)=> {
     try {
@@ -8,13 +9,19 @@ exports.createUser = async (req,res)=> {
             password : req.body.password
         };
         const newUser = await User.create(userObj);
-        res.send({newUser});
+        const token = await jwt.sign({id: newUser._id}, process.env.SECRET);
+        res.send({newUser, token});
     } catch (error) {
         console.log(error)
         res.send({error});
     }
 };
 
+exports.login = async (req,res)=>{
+    const token = await jwt.sign({id: req.user._id},process.env.SECRET);
+    console.log("tokenLogin hit", req.user);
+    res.send({user: req.user, token});
+}
 
 exports.deleteUser = async (req,res)=>{
     try {
@@ -27,4 +34,6 @@ exports.deleteUser = async (req,res)=>{
     } catch (error) {
         console.log(error);
     }
-}
+};
+
+

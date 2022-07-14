@@ -13,6 +13,6 @@ app.use(userRouter);
 console.log("server working");
 
 app.listen(port, async ()=>{
-    await User.sync({alter:true})
+    await User.sync({alter:true, force: false})
     console.log(`App is listening on ${port}`);
 })

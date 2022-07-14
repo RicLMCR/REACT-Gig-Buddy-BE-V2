@@ -1,4 +1,6 @@
 const bcrypt = require("bcryptjs");
+const jwt = require ("jsonwebtoken")
+const User = require ("../user/model")
 
 exports.hashPassword = async (req,res, next)=>{
     try {
@@ -6,6 +8,36 @@ exports.hashPassword = async (req,res, next)=>{
         next();
     } catch (error) {
         console.log(error);
+        res.send({error: error.code});
+    }
+};
+
+exports.unHash = async(req,res,next)=>{
+    try {
+        req.user = await User.findOne({username: req.body.username});
+        const result = await bcrypt.compare(req.body.password, req.user.password);
+        if (result){
+            next();
+        } else {
+            throw new Error("Incorrect credentials");
+        }
+    } catch (error) {
+        console.log(error);
+        res.send({error: error.code});
+    }
+}
+
+exports.tokenCheck = async (req,res,next)=>{
+    try {
+        console.log("tokenCheck Hit");
+        const token = req.header("Authorization");
+        const decodedToken = jwt.verify(token, process.env.SECRET);
+        req.user = await User.findByPk(decodedToken.id);
+        console.log(req.user)
+        next();
+    } catch (error) {
+        console.log(error);
+        res.send({error: error.code});
     }
 }
 
